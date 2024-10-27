@@ -5,6 +5,7 @@ typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned long long int uint64;
+typedef signed long int int32;
 
 #define PAGE_SIZE 4096
 

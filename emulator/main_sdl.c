@@ -1,10 +1,14 @@
-#include "registers.h"
+#include "bus.h"
+#include "cpu.h"
 #include "types.h"
 
-Register register;
+int main2() {
 
-int main() {
-  uint32 pc = 0;
+  CPU cpu;
+  Bus bus;
+
+  create_cpu(&cpu);
+  reset_cpu(&cpu);
   int quit = 0;
 
   while (!quit) {

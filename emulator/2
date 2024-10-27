@@ -33,7 +33,7 @@ int main() {
   fclose(file);
 
   // Display instructions as hex (or process them as needed)
-  for (size_t i = 0; i < 0x0b; i += 4) {
+  for (size_t i = 0; i < 0x16; i += 4) {
     uint32 instruction = *(uint32 *)(text_section + i);
     run_instruction(&cpu, instruction);
 
