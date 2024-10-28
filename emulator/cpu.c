@@ -124,6 +124,39 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
   }
 }
 
+void run_b_instructions(CPU *cpu, uint32 instr) {
+  int rs1 = rs1(instr);
+  int rs2 = rs2(instr);
+
+  int func3 = (instr >> 12) & 0x7; // func3 (3 bit
+  //
+  switch (func3) {
+  case BEQ:
+    int32 imm = (int32)(instr >> 20); // Extract imm[11:0] (12 bits)
+    if (imm & 0x800) {                // If the sign bit (bit 11) is set,
+      imm |= 0xFFFFF000;              // sign-extend to 32 bits
+    }
+
+    if (rs1 == rs2) {
+      cpu->pc += imm;
+    };
+
+    break;
+  case BNE:
+    break;
+  case BLT:
+    break;
+  case BGE:
+    break;
+  case BLTU:
+    break;
+  case BGEU:
+    break;
+  default:
+    break;
+  }
+}
+
 void run_instruction(CPU *cpu, uint32 instr) {
   int opcode = instr & 0x7f;
 
@@ -140,6 +173,7 @@ void run_instruction(CPU *cpu, uint32 instr) {
   case S:
     break;
   case B:
+    run_b_instructions(cpu, instr);
     break;
   default:
     printf("Illegal instruction!!!\n");

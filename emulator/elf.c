@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int read_elf_header(char *file) {
+struct shdr read_elf_header(char *file) {
   FILE *f = fopen(file, "rb");
   if (!f) {
     perror("Failed to open ELF file");
@@ -43,10 +43,7 @@ int read_elf_header(char *file) {
   for (int i = 0; i < ehdr.shnum; i++) {
     const char *section_name = shstrtab + sections[i].name;
     if (strcmp(section_name, ".text") == 0) {
-      printf("%d\n", sections[i].size);
-      return sections[i].size;
+      return sections[i];
     }
   }
-
-  return 0;
 }

@@ -11,7 +11,7 @@ int main() {
 
   int quit = 0;
   char *filename = "test/test.O";
-  int text_size = read_elf_header("test/test.O");
+  struct shdr text = read_elf_header("test/test.O");
   FILE *file = fopen(filename, "rb");
   if (!file) {
     perror("Failed to open file");
@@ -19,10 +19,10 @@ int main() {
   }
 
   // Move to the `.text` section offset
-  fseek(file, 0x40, SEEK_SET);
+  fseek(file, text.offset, SEEK_SET);
 
   // Allocate memory to hold the `.text` section
-  uint8 *text_section = malloc(text_size + 4);
+  uint8 *text_section = malloc(text.size + 4);
   if (!text_section) {
     perror("Failed to allocate memory");
     fclose(file);
@@ -30,11 +30,11 @@ int main() {
   }
 
   // Read the `.text` section into memory
-  fread(text_section, 1, text_size + 4, file);
+  fread(text_section, 1, text.size + 4, file);
   fclose(file);
 
   // Display instructions as hex (or process them as needed)
-  for (size_t i = 0; i < text_size; i += 4) {
+  for (size_t i = 0; i < text.size; i += 4) {
     uint32 instruction = *(uint32 *)(text_section + i);
     run_instruction(&cpu, instruction);
 
