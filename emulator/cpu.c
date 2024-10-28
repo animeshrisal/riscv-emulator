@@ -135,6 +135,7 @@ void run_instruction(CPU *cpu, uint32 instr) {
     run_i_instructions(cpu, instr);
     break;
   case L:
+
     break;
   case S:
     break;

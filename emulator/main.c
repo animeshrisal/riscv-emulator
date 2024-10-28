@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "elf.h"
 #include "types.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +11,7 @@ int main() {
 
   int quit = 0;
   char *filename = "test/test.O";
-  read_text_section("test/test.O", 0x40, 0x12);
+  int text_size = read_elf_header("test/test.O");
   FILE *file = fopen(filename, "rb");
   if (!file) {
     perror("Failed to open file");
@@ -21,7 +22,7 @@ int main() {
   fseek(file, 0x40, SEEK_SET);
 
   // Allocate memory to hold the `.text` section
-  uint8 *text_section = malloc(0x12);
+  uint8 *text_section = malloc(text_size + 4);
   if (!text_section) {
     perror("Failed to allocate memory");
     fclose(file);
@@ -29,11 +30,11 @@ int main() {
   }
 
   // Read the `.text` section into memory
-  fread(text_section, 1, 0x12, file);
+  fread(text_section, 1, text_size + 4, file);
   fclose(file);
 
   // Display instructions as hex (or process them as needed)
-  for (size_t i = 0; i < 0x0b; i += 4) {
+  for (size_t i = 0; i < text_size; i += 4) {
     uint32 instruction = *(uint32 *)(text_section + i);
     run_instruction(&cpu, instruction);
 

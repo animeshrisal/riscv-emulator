@@ -2,25 +2,29 @@
 #define ELF_H
 
 #include "types.h"
-#define ELF_MAGIC 0x464C457FU // "\x7FELF" in little endian
+
+#define ELF_MAGIC_0 0x7F
+#define ELF_MAGIC_1 'E'
+#define ELF_MAGIC_2 'L'
+#define ELF_MAGIC_3 'F'
 
 // File header
 struct elfhdr {
-  uint8 magic; // must equal ELF_MAGIC
+  uint8 magic[4]; // must equal ELF_MAGIC
   uint8 elf[12];
-  uint8 type;
-  uint8 machine;
-  uint8 version;
+  uint16 type;
+  uint16 machine;
+  uint32 version;
   uint64 entry;
   uint64 phoff;
   uint64 shoff;
-  uint8 flags;
-  uint8 ehsize;
-  uint8 phentsize;
-  uint8 phnum;
-  uint8 shentsize;
-  uint8 shnum;
-  uint8 shstrndx;
+  uint32 flags;
+  uint16 ehsize;
+  uint16 phentsize;
+  uint16 phnum;
+  uint16 shentsize;
+  uint16 shnum;
+  uint16 shstrndx;
 };
 
 // Program section header
@@ -35,6 +39,19 @@ struct proghdr {
   uint64 align;
 };
 
+struct shdr {
+  uint32 name;
+  uint32 type;
+  uint64 flags;
+  uint64 addr;
+  uint64 offset;
+  uint64 size;
+  uint32 link;
+  uint32 info;
+  uint64 addralign;
+  uint64 entsize;
+};
+
 // Values for Proghdr type
 #define ELF_PROG_LOAD 1
 
@@ -43,5 +60,5 @@ struct proghdr {
 #define ELF_PROG_FLAG_WRITE 2
 #define ELF_PROG_FLAG_READ 4
 
-void read_elf_header32(struct elfhdr *elf);
+int read_elf_header(char *file);
 #endif
