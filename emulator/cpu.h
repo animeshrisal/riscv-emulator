@@ -6,6 +6,8 @@
 #define L 0b00000011
 #define S 0b0100011
 #define B 0b11000011
+#define LUI 0b0110111
+#define AUI 0b0010111
 
 #define ADDSUB 0x0
 #define ADD 0x00
@@ -25,6 +27,16 @@
 #define BGE 0x5
 #define BLTU 0x6
 #define BGEU 0x7
+
+#define SB 0x0
+#define SH 0x1
+#define SW 0x2
+
+#define LB 0x0
+#define LH 0x1
+#define LW 0x2
+#define LBU 0x4
+#define LHU 0x5
 
 #define rd(v) (v >> 7) & 0x1f
 #define rs1(v) (v >> 15) & 0x1f

@@ -3,8 +3,6 @@
 #include "types.h"
 #include <stdio.h>
 
-void initialize_registers(uint32 *reg) {}
-
 void create_cpu(CPU *cpu) {
   for (int i = 0; i < 32; i++) {
     cpu->riscv_register[i] = 0;
@@ -80,9 +78,10 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
   int rd = rd(instr);
   int rs1 = rs1(instr);
 
-  int32 imm = (int32)(instr >> 20); // Extract imm[11:0] (12 bits)
-  if (imm & 0x800) {                // If the sign bit (bit 11) is set,
-    imm |= 0xFFFFF000;              // sign-extend to 32 bits
+  //
+  int32 imm = (int32)(instr >> 20);
+  if (imm & 0x800) {
+    imm |= 0xFFFFF000;
   }
 
   uint64 *regs = cpu->riscv_register;
@@ -111,6 +110,7 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
     break;
 
   case SRA:
+
     break;
 
   case SLT:
@@ -127,32 +127,139 @@ void run_i_instructions(CPU *cpu, uint32 instr) {
 void run_b_instructions(CPU *cpu, uint32 instr) {
   int rs1 = rs1(instr);
   int rs2 = rs2(instr);
+  int32 imm = (int32)(instr >> 20); // Extract imm[11:0] (12 bits)
+  if (imm & 0x800) {                // If the sign bit (bit 11) is set,
+    imm |= 0xFFFFF000;              // sign-extend to 32 bits
+  }
 
   int func3 = (instr >> 12) & 0x7; // func3 (3 bit
   //
   switch (func3) {
   case BEQ:
-    int32 imm = (int32)(instr >> 20); // Extract imm[11:0] (12 bits)
-    if (imm & 0x800) {                // If the sign bit (bit 11) is set,
-      imm |= 0xFFFFF000;              // sign-extend to 32 bits
-    }
-
     if (rs1 == rs2) {
       cpu->pc += imm;
     };
 
     break;
   case BNE:
+    if (rs1 != rs2) {
+      cpu->pc += imm;
+    }
     break;
   case BLT:
+    if (rs1 < rs2) {
+      cpu->pc += imm;
+    }
+
     break;
   case BGE:
+    if (rs1 >= rs2) {
+      cpu->pc += imm;
+    }
+
     break;
   case BLTU:
+    if (rs1 < rs2) {
+      cpu->pc += imm;
+    }
+
     break;
   case BGEU:
+    if (rs1 >= rs2) {
+      cpu->pc += imm;
+    }
+
     break;
   default:
+    break;
+  }
+
+  cpu->pc -= 0x4;
+}
+
+void run_l_instructions(CPU *cpu, uint32 instr) {
+  int func3 = (instr >> 12) & 0x7;
+  int rd = rd(instr);
+  int rs1 = rs1(instr);
+  int32 imm = (int32)(instr >> 20);
+
+  if (imm & 0x800) {
+    imm |= 0xFFFFF000; // Sign-extend immediate
+  }
+
+  uint64 addr = cpu->riscv_register[rs1] + imm;
+  uint64 *regs = cpu->riscv_register;
+
+  switch (func3) {
+  case LB:
+    regs[rd] = (int8)bus_read8(cpu->bus, addr); // Load Byte, sign-extended
+    break;
+  case LH:
+    regs[rd] = (int16)bus_read16(cpu->bus, addr); // Load Half, sign-extended
+    break;
+  case LW:
+    regs[rd] = (int32)bus_read32(cpu->bus, addr); // Load Word, sign-extended
+    break;
+  case LBU:
+    regs[rd] = bus_read8(cpu->bus, addr); // Load Byte, zero-extended
+    break;
+  case LHU:
+    regs[rd] = bus_read16(cpu->bus, addr); // Load Half, zero-extended
+    break;
+  default:
+    printf("Illegal load instruction\n");
+    break;
+  }
+}
+
+void run_s_instructions(CPU *cpu, uint32 instr) {
+  int func3 = (instr >> 12) & 0x7;
+  int rs1 = rs1(instr);
+  int rs2 = rs2(instr);
+
+  int imm1 = (instr >> 7) & 0x1F;  // imm[4:0]
+  int imm2 = (instr >> 25) & 0x7F; // imm[11:5]
+  int32 imm = (imm2 << 5) | imm1;  // Concatenate for full 12-bit immediate
+
+  if (imm & 0x800) {
+    imm |= 0xFFFFF000; // Sign-extend immediate
+  }
+
+  uint64 addr = cpu->riscv_register[rs1] + imm;
+  uint64 value = cpu->riscv_register[rs2];
+
+  switch (func3) {
+  case SB:
+    bus_write8(cpu->bus, addr, (uint8_t)value); // Store Byte
+    break;
+  case SH:
+    bus_write16(cpu->bus, addr, (uint16_t)value); // Store Half
+    break;
+  case SW:
+    bus_write32(cpu->bus, addr, (uint32_t)value); // Store Word
+    break;
+  default:
+    printf("Illegal store instruction\n");
+    break;
+  }
+}
+
+void run_u_instructions(CPU *cpu, uint32 instr) {
+  int opcode = instr & 0x7F;
+  int rd = rd(instr);
+  int32 imm = instr & 0xFFFFF000; // Upper 20 bits for U-type immediate
+
+  uint64 *regs = cpu->riscv_register;
+
+  switch (opcode) {
+  case LUI:
+    regs[rd] = imm; // Load Upper Immediate
+    break;
+  case AUI:
+    regs[rd] = cpu->pc + imm; // AUIPC: Add Upper Immediate to PC
+    break;
+  default:
+    printf("Illegal U-type instruction\n");
     break;
   }
 }
@@ -168,13 +275,17 @@ void run_instruction(CPU *cpu, uint32 instr) {
     run_i_instructions(cpu, instr);
     break;
   case L:
-
+    run_l_instructions(cpu, instr);
     break;
   case S:
+    run_s_instructions(cpu, instr);
     break;
   case B:
     run_b_instructions(cpu, instr);
     break;
+  case LUI:
+  case AUI:
+    run_u_instructions(cpu, instr);
   default:
     printf("Illegal instruction!!!\n");
     break;
