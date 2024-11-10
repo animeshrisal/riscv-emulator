@@ -46,4 +46,4 @@ struct shdr read_elf_header(char *file) {
       return sections[i];
     }
   }
-}
+};

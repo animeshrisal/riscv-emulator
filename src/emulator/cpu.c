@@ -8,7 +8,6 @@ void create_cpu(CPU *cpu) {
     cpu->riscv_register[i] = 0;
   }
   cpu->pc = DRAM_BASE;
-
   for (int i = 0; i < 4096; i++) {
     cpu->csr[i] = 0;
   }
@@ -40,6 +39,7 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
     break;
 
   case SLT:
+
     regs[rd] = (regs[rs1] < regs[rs2]) ? 1 : 0; // Set Less Than
     break;
 
@@ -50,7 +50,6 @@ void run_r_instructions(CPU *cpu, uint32 instr) {
   case XOR:
     regs[rd] = regs[rs1] ^ regs[rs2];
     break;
-
   case SRL:
     if (func7 == SRL) {
       regs[rd] = regs[rs1] >> regs[rs2]; // Shift Right Logical
@@ -230,13 +229,13 @@ void run_s_instructions(CPU *cpu, uint32 instr) {
 
   switch (func3) {
   case SB:
-    bus_write8(cpu->bus, addr, (uint8_t)value); // Store Byte
+    bus_write8(cpu->bus, addr, (uint8)value); // Store Byte
     break;
   case SH:
-    bus_write16(cpu->bus, addr, (uint16_t)value); // Store Half
+    bus_write16(cpu->bus, addr, (uint16)value); // Store Half
     break;
   case SW:
-    bus_write32(cpu->bus, addr, (uint32_t)value); // Store Word
+    bus_write32(cpu->bus, addr, (uint32)value); // Store Word
     break;
   default:
     printf("Illegal store instruction\n");
@@ -287,9 +286,7 @@ void run_instruction(CPU *cpu, uint32 instr) {
   case AUI:
     run_u_instructions(cpu, instr);
   default:
-    printf("Illegal instruction!!!\n");
+    printf("Illeual instruction!!!\n");
     break;
   }
 }
-
-uint32 cpu_fetch_instruction(Bus *bus) { return 0; }

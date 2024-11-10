@@ -19,6 +19,4 @@ void bus_write8(Bus *bus, uint64 addr, uint8 value);
 void bus_write16(Bus *bus, uint64 addr, uint16 value);
 void bus_write32(Bus *bus, uint64 addr, uint32 value);
 void bus_write64(Bus *bus, uint64 addr, uint64 value);
-
-void load_instructions();
 #endif

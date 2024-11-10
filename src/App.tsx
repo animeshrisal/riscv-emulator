@@ -5,10 +5,15 @@ import Playground from './components/Playground'
 
 function App() {
 
+  const [file, setFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e)
+  };
+
   return (
     <div>
       <Drop />
-      <Playground />
     </div>
   )
 }

@@ -1,10 +1,12 @@
 #include "bus.h"
 
-uint8 bus_read8(Bus *bus, uint64 address) { return bus->memory[address]; }
+uint8 bus_read8(Bus *bus, uint64 address) {
+  return (uint8)bus->memory[address];
+}
 
 uint16 bus_read16(Bus *bus, uint64 address) {
   return (uint16)bus->memory[address] | (uint16)(bus->memory[address + 1] << 8);
-}
+};
 
 uint32 bus_read32(Bus *bus, uint64 address) {
   return (uint32)bus->memory[address] |

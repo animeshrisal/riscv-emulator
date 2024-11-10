@@ -48,6 +48,7 @@ typedef struct CPU {
   uint64 riscv_register[32];
   uint64 pc;
   uint32 csr[4096];
+  Bus *bus;
 } CPU;
 
 void create_cpu(CPU *cpu);
